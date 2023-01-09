@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="shadowdom" />
         <module name="handling-stale-element-exceptions-in-selenium-java" />
+        <module name="handle-multiple-windows-in-selenium" />
       </profile>
     </annotationProcessing>
   </component>
