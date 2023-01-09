@@ -32,7 +32,8 @@ public class HandleMultipleWindowsTests {
     }
 
     // TODO: add iterator version here for working with handles --> add transcript
-    
+    // TODO: add generic handler for actions based on title contains? or generic rule?
+    // close and then switch back
     @Test
     public void singleWindowPopUp() {
         driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
