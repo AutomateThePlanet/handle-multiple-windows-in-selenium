@@ -31,6 +31,8 @@ public class HandleMultipleWindowsTests {
         webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(WAIT_FOR_ELEMENT_TIMEOUT));
     }
 
+    // TODO: add iterator version here for working with handles --> add transcript
+    
     @Test
     public void singleWindowPopUp() {
         driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
@@ -60,9 +62,17 @@ public class HandleMultipleWindowsTests {
                 acceptAllCookiesButton.click();
                 var followButton = driver.findElement(By.xpath("//div[@aria-label = 'Follow @lambdatesting']"));
                followButton.click();
+
+               // close window
+                driver.close();
             }
         }
 
+        //  Switch back to the main window which is the parent window.
+        driver.switchTo().window(mainWindow);
+
+
+        // Other methods:
         // driver.quit(); closes all tabs and windows
         // Opens a new tab and switches to new tab Selenium 4
         driver.switchTo().newWindow(WindowType.TAB);
