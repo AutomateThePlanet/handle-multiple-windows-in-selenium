@@ -42,32 +42,15 @@ public class HandleMultipleWindowsTests {
 
         webDriverWait.until(ExpectedConditions.numberOfWindowsToBe(2));
 
+        // Main window handle is CDwindow-ACAC2FFDF24476C67FB5E0897343272B
         String parentWin = driver.getWindowHandle();
         Set<String> windows = driver.getWindowHandles();
         Iterator<String> it = windows.iterator();
-
         while(it.hasNext()) {
-
             String currentWindow = it.next();
-
             if(!parentWin.equals(currentWindow)) {
                 var childWindow = driver.switchTo().window(currentWindow);
-
-                //webDriverWait.until(ExpectedConditions.titleContains("yourTitle"));
                 childWindow.manage().window().maximize();
-                // cannot find - //span[text() = 'Follow']
-                // how to wait for title on window?
-                // timeouts
-                //var turnOnNotificationsNotNowButton = driver.findElement(By.xpath("//span[text()='Not now']"));
-                var turnOnNotificationsNotNowButton = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//span[text()='Not now']")));
-                turnOnNotificationsNotNowButton.click();
-                var acceptAllCookiesButton = driver.findElement(By.xpath("//span[text()='Accept all cookies']"));
-                acceptAllCookiesButton.click();
-                var followButton = driver.findElement(By.xpath("//div[@aria-label = 'Follow @lambdatesting']"));
-                followButton.click();
-
-                // close window
-                driver.close();
             }
         }
 
@@ -85,7 +68,7 @@ public class HandleMultipleWindowsTests {
         System.out.println("Main window handle is " + mainWindow);
 
         // To handle child window
-        List<String> allWindows = driver.getWindowHandles().stream().toList();
+        Set<String> allWindows = driver.getWindowHandles();
         for (var currentWindow:allWindows) {
             if (!mainWindow.equalsIgnoreCase(currentWindow)) {
                 var childWindow = driver.switchTo().window(currentWindow);
