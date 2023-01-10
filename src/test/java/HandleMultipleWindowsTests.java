@@ -10,9 +10,12 @@ import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import utilities.WindowHandler;
 
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class HandleMultipleWindowsTests {
     private final int WAIT_FOR_ELEMENT_TIMEOUT = 30;
@@ -31,9 +34,45 @@ public class HandleMultipleWindowsTests {
         webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(WAIT_FOR_ELEMENT_TIMEOUT));
     }
 
-    // TODO: add iterator version here for working with handles --> add transcript
-    // TODO: add generic handler for actions based on title contains? or generic rule?
-    // close and then switch back
+    @Test
+    public void singleWindowPopUp_iterator() {
+        driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
+        WebElement followOnTwitter = driver.findElement(By.xpath("//a[text()='  Follow On Twitter ']"));
+        followOnTwitter.click();
+
+        webDriverWait.until(ExpectedConditions.numberOfWindowsToBe(2));
+
+        String parentWin = driver.getWindowHandle();
+        Set<String> windows = driver.getWindowHandles();
+        Iterator<String> it = windows.iterator();
+
+        while(it.hasNext()) {
+
+            String currentWindow = it.next();
+
+            if(!parentWin.equals(currentWindow)) {
+                var childWindow = driver.switchTo().window(currentWindow);
+
+                //webDriverWait.until(ExpectedConditions.titleContains("yourTitle"));
+                childWindow.manage().window().maximize();
+                // cannot find - //span[text() = 'Follow']
+                // how to wait for title on window?
+                // timeouts
+                //var turnOnNotificationsNotNowButton = driver.findElement(By.xpath("//span[text()='Not now']"));
+                var turnOnNotificationsNotNowButton = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//span[text()='Not now']")));
+                turnOnNotificationsNotNowButton.click();
+                var acceptAllCookiesButton = driver.findElement(By.xpath("//span[text()='Accept all cookies']"));
+                acceptAllCookiesButton.click();
+                var followButton = driver.findElement(By.xpath("//div[@aria-label = 'Follow @lambdatesting']"));
+                followButton.click();
+
+                // close window
+                driver.close();
+            }
+        }
+
+    }
+
     @Test
     public void singleWindowPopUp() {
         driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
@@ -113,6 +152,22 @@ public class HandleMultipleWindowsTests {
                 }
             }
         }
+    }
+
+    @Test
+    public void testWindowHandler() {
+        driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
+        WebElement followOnTwitter = driver.findElement(By.xpath("//a[text()='  Follow On Twitter ']"));
+        followOnTwitter.click();
+
+        WindowHandler.handle(driver, "Twitter", true, () -> {
+            var turnOnNotificationsNotNowButton = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//span[text()='Not now']")));
+            turnOnNotificationsNotNowButton.click();
+            var acceptAllCookiesButton = driver.findElement(By.xpath("//span[text()='Accept all cookies']"));
+            acceptAllCookiesButton.click();
+            var followButton = driver.findElement(By.xpath("//div[@aria-label = 'Follow @lambdatesting']"));
+            followButton.click();
+        });
     }
 
     @AfterEach

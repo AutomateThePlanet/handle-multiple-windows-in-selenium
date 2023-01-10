@@ -9,12 +9,15 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import utilities.WindowHandler;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class HandleMultipleWindowsLambdaTestTests {
     private final int WAIT_FOR_ELEMENT_TIMEOUT = 30;
@@ -51,19 +54,25 @@ public class HandleMultipleWindowsLambdaTestTests {
     }
 
     @Test
-    public void singleWindowPopUp() {
+    public void singleWindowPopUp_iterator() {
         driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
         WebElement followOnTwitter = driver.findElement(By.xpath("//a[text()='  Follow On Twitter ']"));
         followOnTwitter.click();
 
-        String mainWindow = driver.getWindowHandle();
-        System.out.println("Main window handle is " + mainWindow);
+        webDriverWait.until(ExpectedConditions.numberOfWindowsToBe(2));
 
-        // To handle child window
-        List<String> allWindows = driver.getWindowHandles().stream().toList();
-        for (var currentWindow:allWindows) {
-            if (!mainWindow.equalsIgnoreCase(currentWindow)) {
+        String parentWin = driver.getWindowHandle();
+        Set<String> windows = driver.getWindowHandles();
+        Iterator<String> it = windows.iterator();
+
+        while(it.hasNext()) {
+
+            String currentWindow = it.next();
+
+            if(!parentWin.equals(currentWindow)) {
                 var childWindow = driver.switchTo().window(currentWindow);
+
+                //webDriverWait.until(ExpectedConditions.titleContains("yourTitle"));
                 childWindow.manage().window().maximize();
                 // cannot find - //span[text() = 'Follow']
                 // how to wait for title on window?
@@ -74,10 +83,55 @@ public class HandleMultipleWindowsLambdaTestTests {
                 var acceptAllCookiesButton = driver.findElement(By.xpath("//span[text()='Accept all cookies']"));
                 acceptAllCookiesButton.click();
                 var followButton = driver.findElement(By.xpath("//div[@aria-label = 'Follow @lambdatesting']"));
-               followButton.click();
+                followButton.click();
+
+                // close window
+                driver.close();
             }
         }
 
+    }
+
+    @Test
+    public void singleWindowPopUp() {
+        driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
+        WebElement followOnTwitter = driver.findElement(By.xpath("//a[text()='  Follow On Twitter ']"));
+        followOnTwitter.click();
+
+        webDriverWait.until(ExpectedConditions.numberOfWindowsToBe(2));
+
+        String mainWindow = driver.getWindowHandle();
+        System.out.println("Main window handle is " + mainWindow);
+
+        // To handle child window
+        List<String> allWindows = driver.getWindowHandles().stream().toList();
+        for (var currentWindow:allWindows) {
+            if (!mainWindow.equalsIgnoreCase(currentWindow)) {
+                var childWindow = driver.switchTo().window(currentWindow);
+
+                //webDriverWait.until(ExpectedConditions.titleContains("yourTitle"));
+                childWindow.manage().window().maximize();
+                // cannot find - //span[text() = 'Follow']
+                // how to wait for title on window?
+                // timeouts
+                //var turnOnNotificationsNotNowButton = driver.findElement(By.xpath("//span[text()='Not now']"));
+                var turnOnNotificationsNotNowButton = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//span[text()='Not now']")));
+                turnOnNotificationsNotNowButton.click();
+                var acceptAllCookiesButton = driver.findElement(By.xpath("//span[text()='Accept all cookies']"));
+                acceptAllCookiesButton.click();
+                var followButton = driver.findElement(By.xpath("//div[@aria-label = 'Follow @lambdatesting']"));
+                followButton.click();
+
+                // close window
+                driver.close();
+            }
+        }
+
+        //  Switch back to the main window which is the parent window.
+        driver.switchTo().window(mainWindow);
+
+
+        // Other methods:
         // driver.quit(); closes all tabs and windows
         // Opens a new tab and switches to new tab Selenium 4
         driver.switchTo().newWindow(WindowType.TAB);
@@ -117,6 +171,22 @@ public class HandleMultipleWindowsLambdaTestTests {
                 }
             }
         }
+    }
+
+    @Test
+    public void testWindowHandler() {
+        driver.navigate().to("https://www.lambdatest.com/selenium-playground/window-popup-modal-demo");
+        WebElement followOnTwitter = driver.findElement(By.xpath("//a[text()='  Follow On Twitter ']"));
+        followOnTwitter.click();
+
+        WindowHandler.handle(driver, "Twitter", true, () -> {
+            var turnOnNotificationsNotNowButton = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//span[text()='Not now']")));
+            turnOnNotificationsNotNowButton.click();
+            var acceptAllCookiesButton = driver.findElement(By.xpath("//span[text()='Accept all cookies']"));
+            acceptAllCookiesButton.click();
+            var followButton = driver.findElement(By.xpath("//div[@aria-label = 'Follow @lambdatesting']"));
+            followButton.click();
+        });
     }
 
     @AfterEach
